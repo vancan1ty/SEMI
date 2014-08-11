@@ -3,6 +3,7 @@ package com.cvberry.simplemavenintegration.logic;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
@@ -112,12 +113,13 @@ public class Logic {
 					throws IOException, InterruptedException {
 		plugin.log(Status.INFO, toRun);
 		Process p = Runtime.getRuntime().exec(toRun);
-		p.waitFor();
+//		p.waitFor();
 
 		String line = "";
+		InputStream iStream = p.getInputStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				p.getInputStream()));
-		while ((line = reader.readLine()) != null) {
+				iStream));
+		while ((line = reader.readLine()) != null ) {
 			out.write((line + "\n").getBytes());
 		}
 	}

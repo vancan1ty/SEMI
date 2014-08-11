@@ -2,6 +2,8 @@ package com.cvberry.simplemavenintegration.views;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -36,7 +38,11 @@ import org.eclipse.swt.SWT;
 
 import com.cvberry.simplemavenintegration.Activator;
 import com.cvberry.simplemavenintegration.console.SimpleMvnConsoleFactory;
+import com.cvberry.simplemavenintegration.data.ProjectModel;
+import com.cvberry.simplemavenintegration.data.StateObject;
+import com.cvberry.simplemavenintegration.data.StateSaveHandler;
 import com.cvberry.simplemavenintegration.logic.Logic;
+import com.cvberry.simplemavenintegration.runners.MvnExecutor;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -248,21 +254,11 @@ public class SimpleMvnView extends ViewPart {
 					showMessage("can't run maven, since you aren't in project!");
 				}
 
-				try {
-
-					SimpleMvnConsoleFactory factory = new SimpleMvnConsoleFactory();
-					MessageConsole toUse = factory.getSimpleMvnConsole();
-					Logic.invokeMaven(stateHolder.plugin, 
-							Logic.getFullPathToProject(stateHolder.workspace,
-									currProject), 
-									input.getText(),
-									toUse.newMessageStream());
-				} catch (IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					showMessage("invocation of maven failed: "
-							+ e1.getMessage());
-				}
+				SimpleMvnConsoleFactory factory = new SimpleMvnConsoleFactory();
+				MessageConsole toUse = factory.getSimpleMvnConsole();
+				MvnExecutor.runMvnOnNewThreadWithConsoleOut(stateHolder.plugin,
+						stateHolder.workspace, stateHolder.currProject,
+						input.getText());
 
 			}
 
@@ -365,12 +361,18 @@ public class SimpleMvnView extends ViewPart {
 		action1 = new Action() {
 			public void run() {
 				try {
-					String results = Logic.invokeDir(stateHolder.plugin);
-					showMessage(results);
-				} catch (IOException | InterruptedException e) {
+					StateObject sState = new StateObject();
+					List<ProjectModel> projects = new ArrayList<>();
+					projects.add(new ProjectModel("bah1","chk1"));
+					projects.add(new ProjectModel("bah2","chk2"));
+					sState.trackedProjects = projects;
+
+					StateSaveHandler.saveAppData(Activator.getDefault(), sState);
+					showMessage("data saved!");
+				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					showMessage("couldn't execute dir: " + e.getMessage());
+					showMessage("couldn't execute save state: " + e.getMessage());
 				}
 			}
 		};
