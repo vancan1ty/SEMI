@@ -98,4 +98,20 @@
       </consoleFactory>
    </extension>
 
+  <extension 
+       point="org.eclipse.ui.importWizards"> 
+      <wizard 
+         id="com.cvberry.simplemavenintegration.wizards.MvnImporter" 
+         name="Import maven project." 
+         class="com.cvberry.simplemavenintegration.wizards.MvnImportWizard" 
+         category="simplemvnintegration"
+         icon="./icons/sample.gif">
+         <description> 
+         	Import an existing maven based project into this workspace using
+         	simplemavenintegration.
+         </description> 
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard> 
+   </extension> 
+
 </plugin>

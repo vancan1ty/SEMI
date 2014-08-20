@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.eclipse.core.internal.resources.Project;
 import org.eclipse.core.resources.IProject;
@@ -27,6 +31,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.cvberry.simplemavenintegration.Activator;
+import com.cvberry.simplemavenintegration.runners.MvnExecutor;
+import com.cvberry.simplemavenintegration.runners.MvnExecutor2;
 
 public class Logic {
 
@@ -86,11 +92,12 @@ public class Logic {
 		return runCommand(plugin, runWith);
 	}
 
-	public static void invokeMaven(Activator plugin, String path, 
+	public static int invokeMaven(Activator plugin, String path, 
 			String goals, OutputStream out)
 			throws IOException, InterruptedException {
 		String runWith = "cmd /c mvn -f " + path + " " + goals;
-		runCommandPrintToStream(plugin, runWith,out);
+		int resultCode = runCommandPrintToStream(plugin, runWith,out);
+		return resultCode;
 	}
 	
 	public static String invokeDir(Activator plugin) 
@@ -108,7 +115,18 @@ public class Logic {
 
 	}
 	
-	public static void runCommandPrintToStream(
+	/**
+	 * runs a system command, prints the output of the command to out as it
+	 * is received, returns the exit status of the command.
+	 * 
+	 * @param plugin
+	 * @param toRun
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public static int runCommandPrintToStream(
 			Activator plugin, String toRun, OutputStream out) 
 					throws IOException, InterruptedException {
 		plugin.log(Status.INFO, toRun);
@@ -122,6 +140,31 @@ public class Logic {
 		while ((line = reader.readLine()) != null ) {
 			out.write((line + "\n").getBytes());
 		}
+
+		return p.exitValue();
 	}
 
+	/* public static String convertFilePathToDirPath(String filePath) {
+		filePath.split("/");
+	} */
+	
+	/**
+	 * runs the given commands on maven, printing results to output streams. 
+	 * 
+	 * @param plugin
+	 * @param commands
+	 * @param rootPath
+	 * @param stdOut
+	 * @param stdErr
+	 * @param callBackProcedure will get called after the operation is done!
+	 */
+	public static void runOnMaven(Activator plugin, String commands, 
+			String rootPath, OutputStream stdOut, OutputStream stdErr,
+			Consumer<Integer> callBackProcedure) {
+		Executor ex = Executors.newSingleThreadExecutor();
+		MvnExecutor2 mvnExecutor = new MvnExecutor2(plugin, commands, rootPath, 
+				stdOut, stdErr, callBackProcedure); 
+		Thread t = new Thread(mvnExecutor);
+		t.start();
+	}
 }
