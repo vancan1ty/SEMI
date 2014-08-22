@@ -84,7 +84,7 @@ public class MvnImportWizardPage extends WizardPage {
 					//statusLabel.setText(Integer.toString(i));
 				};
 
-			Logic.runOnMaven(Activator.getDefault(), "validate", 
+			Logic.runOnMavenNewThread(Activator.getDefault(), "validate", 
 						dirPathStr, theOut, theOut, updateValidationStatusFnction);
 
 			}

@@ -1,11 +1,15 @@
 package com.cvberry.simplemavenintegration.wizards;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -15,8 +19,11 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.datatransfer.ExternalProjectImportWizard;
 
 import com.cvberry.simplemavenintegration.Activator;
@@ -47,6 +54,7 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 	public boolean performFinish() {
 		String pomDirPath = wPage.getPomDirectoryPath();
 		ByteArrayOutputStream theOut = new ByteArrayOutputStream();
+
 		Consumer<Integer> continueFinishFunction = (i) -> {
 			if (i == 0) { // then the execution was successful.
 				ExternalProjectImportWizard wizard = new ExternalProjectImportWizard(
@@ -56,7 +64,9 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 						.getActiveShell(), wizard);
 				dialog.open();
 
-		} else {
+
+
+			} else {
 				IStatus warning = new org.eclipse.core.runtime.Status(IStatus.WARNING,
 						Activator.PLUGIN_ID, 1, "You have been warned.", null);
 				ErrorDialog.openError(this.getShell(),
@@ -64,8 +74,30 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 			}
 			// statusLabel.setText(Integer.toString(i));
 		};
-		Logic.runOnMaven(Activator.getDefault(), "eclipse:eclipse", pomDirPath,
-			theOut, theOut, continueFinishFunction);
+
+		IRunnableWithProgress op = new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) {
+				monitor.setTaskName("running mvn eclipse:eclipse goal.");
+				Logic.runOnMavenSameThread(Activator.getDefault(),
+						"eclipse:eclipse", pomDirPath, theOut, theOut,
+						continueFinishFunction);
+
+			}
+		};
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+		Shell shell = win != null ? win.getShell() : null;
+
+		try {
+			new ProgressMonitorDialog(shell).run(true, false, op);
+		} catch (InvocationTargetException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Activator.getDefault().showMessage("there was a problem!",
+					"progress monitor dialog failure: " + e.getMessage());
+			return false;
+		}
 
 		return true;
 	}

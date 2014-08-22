@@ -1,7 +1,15 @@
 package com.cvberry.simplemavenintegration;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -82,6 +90,15 @@ public class Activator extends AbstractUIPlugin {
 						Status.OK, 
 						msg, 
 						e));
+	}
+	
+	public void showMessage(String title, String msg) {
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+		Shell shell = win != null ? win.getShell() : null;
+		IStatus warning = new org.eclipse.core.runtime.Status(IStatus.INFO,
+				Activator.PLUGIN_ID, 1, msg, null);
+		MessageDialog.open(MessageDialog.INFORMATION, shell, title, msg, SWT.SHEET);
 	}
 
 }

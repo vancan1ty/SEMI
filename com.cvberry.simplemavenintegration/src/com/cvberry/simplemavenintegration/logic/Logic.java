@@ -158,7 +158,7 @@ public class Logic {
 	 * @param stdErr
 	 * @param callBackProcedure will get called after the operation is done!
 	 */
-	public static void runOnMaven(Activator plugin, String commands, 
+	public static void runOnMavenNewThread(Activator plugin, String commands, 
 			String rootPath, OutputStream stdOut, OutputStream stdErr,
 			Consumer<Integer> callBackProcedure) {
 		Executor ex = Executors.newSingleThreadExecutor();
@@ -166,5 +166,14 @@ public class Logic {
 				stdOut, stdErr, callBackProcedure); 
 		Thread t = new Thread(mvnExecutor);
 		t.start();
+	}
+
+	public static void runOnMavenSameThread(Activator plugin, String commands, 
+			String rootPath, OutputStream stdOut, OutputStream stdErr,
+			Consumer<Integer> callBackProcedure) {
+		Executor ex = Executors.newSingleThreadExecutor();
+		MvnExecutor2 mvnExecutor = new MvnExecutor2(plugin, commands, rootPath, 
+				stdOut, stdErr, callBackProcedure); 
+		mvnExecutor.run();
 	}
 }
