@@ -1,7 +1,9 @@
 package com.cvberry.simplemavenintegration.wizards;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.function.Consumer;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -55,6 +57,17 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 		String pomDirPath = wPage.getPomDirectoryPath();
 		ByteArrayOutputStream theOut = new ByteArrayOutputStream();
 
+		try {
+			Activator.getDefault().getStateSaveHandler()
+					.addTrackedProject(pomDirPath);
+		} catch (NoSuchAlgorithmException | IOException e1) {
+			// TODO Auto-generated catch block
+			Activator.getDefault().showMessage(
+					"simple_eclipse_maven_integration error.",
+					"project import failed: " + e1.getMessage());
+			e1.printStackTrace();
+		}
+
 		Consumer<Integer> continueFinishFunction = (i) -> {
 			if (i == 0) { // then the execution was successful.
 				ExternalProjectImportWizard wizard = new ExternalProjectImportWizard(
@@ -64,11 +77,10 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 						.getActiveShell(), wizard);
 				dialog.open();
 
-
-
 			} else {
-				IStatus warning = new org.eclipse.core.runtime.Status(IStatus.WARNING,
-						Activator.PLUGIN_ID, 1, "You have been warned.", null);
+				IStatus warning = new org.eclipse.core.runtime.Status(
+						IStatus.WARNING, Activator.PLUGIN_ID, 1,
+						"You have been warned.", null);
 				ErrorDialog.openError(this.getShell(),
 						"This is your final warning", null, warning);
 			}
@@ -77,7 +89,8 @@ public class MvnImportWizard extends Wizard implements IImportWizard {
 
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) {
-				monitor.setTaskName("running mvn eclipse:eclipse goal.");
+				monitor.setTaskName("running mvn eclipse:eclipse goal, which generates"
+						+ " eclipse project files.");
 				Logic.runOnMavenSameThread(Activator.getDefault(),
 						"eclipse:eclipse", pomDirPath, theOut, theOut,
 						continueFinishFunction);

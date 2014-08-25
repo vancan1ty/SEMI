@@ -11,12 +11,12 @@ public class ProjectModel {
 	
 	public ProjectModel() {}
 	
-	public ProjectModel(String projectPath, String pomCheckSum) {
+	public ProjectModel(String projectPath, byte[] pomCheckSum) {
 		this.projectPath = projectPath;
 		this.pomCheckSum = pomCheckSum;
 	}
 
 	public String projectPath;
-	public String pomCheckSum;
+	public byte[] pomCheckSum;
 
 }

@@ -2,6 +2,7 @@ package com.cvberry.simplemavenintegration.views;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -360,20 +361,17 @@ public class SimpleMvnView extends ViewPart {
 	private void makeActions() {
 		action1 = new Action() {
 			public void run() {
-				try {
-					StateObject sState = new StateObject();
-					List<ProjectModel> projects = new ArrayList<>();
-					projects.add(new ProjectModel("bah1","chk1"));
-					projects.add(new ProjectModel("bah2","chk2"));
-					sState.trackedProjects = projects;
-
-					StateSaveHandler.saveAppData(Activator.getDefault(), sState);
-					showMessage("data saved!");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					showMessage("couldn't execute save state: " + e.getMessage());
-				}
+					StateSaveHandler stateHandler = 
+							Activator.getDefault().getStateSaveHandler();
+					StateObject data = stateHandler.getAppStateObject();
+					byte[] dataRep = stateHandler.marshalObjectToByteArray(data);
+					try {
+						showMessage(new String(dataRep, "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						showMessage("unsupported encoding error.");
+					}
 			}
 		};
 		action1.setText("Action 1");
