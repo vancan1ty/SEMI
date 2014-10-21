@@ -87,8 +87,8 @@ public class Activator extends AbstractUIPlugin {
 	public void log(int level, String msg) {
 		getLog().log(
 				new Status(level, Activator.PLUGIN_ID, Status.OK, msg, null));
+		
 	}
-
 	public void log(int level, String msg, Exception e) {
 		getLog().log(new Status(level, Activator.PLUGIN_ID, Status.OK, msg, e));
 	}
@@ -97,8 +97,8 @@ public class Activator extends AbstractUIPlugin {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
 		Shell shell = win != null ? win.getShell() : null;
-		IStatus warning = new org.eclipse.core.runtime.Status(IStatus.INFO,
-				Activator.PLUGIN_ID, 1, msg, null);
+		/*IStatus warning = new org.eclipse.core.runtime.Status(IStatus.INFO,
+				Activator.PLUGIN_ID, 1, msg, null); */
 		MessageDialog.open(MessageDialog.INFORMATION, shell, title, msg,
 				SWT.SHEET);
 	}

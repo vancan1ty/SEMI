@@ -35,7 +35,41 @@ import com.cvberry.simplemavenintegration.runners.MvnExecutor;
 import com.cvberry.simplemavenintegration.runners.MvnExecutor2;
 
 public class Logic {
-
+	
+	public enum SupportedPlatforms {
+		WINDOWS, UNIX_LIKE
+	};
+	
+	public static String INVOKE_PREFIX_WINDOWS = "cmd /c ";
+	public static String INVOKE_PREFIX_UNIX_LIKE = "/bin/sh ";
+	
+	public static SupportedPlatforms getCurrentPlatform() {
+	String osName = System.getProperty("os.name");
+		if (osName.toLowerCase().contains("windows")) {
+			return SupportedPlatforms.WINDOWS;
+		} else {
+			return SupportedPlatforms.UNIX_LIKE;
+		}
+	}
+	
+	/** 
+	 * determines what platform you are running on, and returns either an
+	 * appropriate command prefix for invocation of the shell environment.
+	 * 
+	 * For example, on linux this should return "/bin/sh"
+	 * 
+	 * @return a string which can be used to invoke the console 
+	 *         on your platform.
+	 */
+	private static String getInvokePrefixStr() {
+		SupportedPlatforms platform = getCurrentPlatform();
+		if (platform.equals(SupportedPlatforms.WINDOWS)) {
+			return INVOKE_PREFIX_WINDOWS;
+		} else {
+			return INVOKE_PREFIX_UNIX_LIKE;
+		}
+	}
+	
 	/**
 	 * get the current selected project using the selection service.
 	 * intended to be used to update the plugin working state in stateHolder
@@ -88,21 +122,21 @@ public class Logic {
 
 	public static String invokeMaven(Activator plugin, String path, String goals)
 			throws IOException, InterruptedException {
-		String runWith = "cmd /c mvn -f " + path + " " + goals;
+		String runWith = getInvokePrefixStr() + "mvn -f " + path + " " + goals;
 		return runCommand(plugin, runWith);
 	}
 
 	public static int invokeMaven(Activator plugin, String path, 
 			String goals, OutputStream out)
 			throws IOException, InterruptedException {
-		String runWith = "cmd /c mvn -f " + path + " " + goals;
+		String runWith = getInvokePrefixStr() + "mvn -f " + path + " " + goals;
 		int resultCode = runCommandPrintToStream(plugin, runWith,out);
 		return resultCode;
 	}
 	
 	public static String invokeDir(Activator plugin) 
 			throws IOException, InterruptedException {
-		return runCommand(plugin, "cmd /c mvn -v");
+		return runCommand(plugin, getInvokePrefixStr() + "mvn -v");
 	}
 	
 	public static String runCommand(Activator plugin, String toRun) 
