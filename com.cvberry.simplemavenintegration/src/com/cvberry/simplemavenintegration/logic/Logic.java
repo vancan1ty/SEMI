@@ -117,7 +117,8 @@ public class Logic {
 		IPath rootLoc = root.getLocation();
 		String rootPath = rootLoc.toString();
 
-		return rootPath + currProject.getFullPath().toString();
+		//return rootPath + currProject.getFullPath().toString();
+		return currProject.getLocation().toString();
 	}
 
 	public static String invokeMaven(Activator plugin, String path, String goals)
