@@ -7,12 +7,20 @@ The idea is that, when somewhat more polished, this could be a radically simpler
 
 The idea behind this plugin is that you would be able to get an experience more like IntelliJ IDEA eclipse integration than current M2E.  Right now the reality falls far short of this idea!
 
-Supported Features:
+Supported Features
+-------------------
+
 Import existing maven projects.
+
 Run maven goals from within eclipse.
+
 Maven output in the console.
 
-Todo list:
+Todo list
+----------
+
 Get New Project wizard working.
+
 Get automatic eclipse rebuild triggered on pom change.
+
 Fix project renames.
